@@ -1,0 +1,61 @@
+# Move the `v1` reference onto whatever `main` now holds.
+#
+# `v1` is what users write -- `uses: giancarlosisasi/molt-action@v1` -- and it is a MOVING ref by
+# the GitHub Actions convention, not a release. It must point at the newest working 1.x action.
+#
+# Moving it used to be a step inside the molt repository's release workflow, conditional on molt
+# having published something. That was wrong twice over: it tied the action's version to the CLI's
+# release cadence, and when the condition silently evaluated false the pointer sat on the 0.1.0
+# commit through two releases while every `@v1` consumer ran stale code. It belongs here, where a
+# change to `action.yml` is the event that should move it.
+#
+# `v1.x.y` is not written by this workflow. An immutable point release is a deliberate act -- tag
+# it by hand when the action's behaviour changes in a way somebody might want to pin.
+name: release
+
+on:
+  push:
+    branches: [main]
+    # A README edit is not a release of the action. Only the files a runner actually executes.
+    paths:
+      - "action.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: move-v1
+  cancel-in-progress: false
+
+jobs:
+  move-v1:
+    name: move the v1 reference
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # force-push the moving tag
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The conformance test gates the move. A `v1` pointed at an `action.yml` whose inputs the
+      # installed CLI rejects is precisely the breakage this repository exists to prevent, and
+      # moving the pointer first and testing after would ship it.
+      - name: Install uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+
+      - name: Run the conformance test
+        run: uv run --no-project --refresh --with molt-release --with pytest pytest
+
+      # The token goes on the remote URL for this one command rather than into the checkout, so no
+      # later step inherits a credential it did not ask for. Actions masks it in the log.
+      - name: Move v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f -a v1 -m "molt action v1"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" refs/tags/v1

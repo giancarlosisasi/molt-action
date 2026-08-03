@@ -1,0 +1,43 @@
+# The conformance test, run against the `molt-release` a user would install TODAY.
+#
+# This repository ships one YAML file, so "does it parse" is not the question worth asking. The
+# question is whether `action.yml`'s inputs still match the options `molt-action` declares, because
+# those two now live in different repositories and nothing but this job notices when they diverge.
+# `tests/test_action_yml.py` resolves the options off the installed entry point to answer it.
+#
+# The schedule is what makes it useful. A push here cannot break the pairing on its own -- a
+# release of `molt-release` in the OTHER repository can, and this repository would never hear about
+# it. So the job also runs weekly, and a red weekly run means the CLI moved out from under `v1`.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Mondays, 06:00 UTC. Weekly, matching the Dependabot interval next door.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  conformance:
+    name: action.yml matches the molt CLI
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+
+      # `--no-project` because this directory is not a Python package; `--refresh` so a cached
+      # index entry cannot make a stale `molt-release` pass the weekly run, which is the one run
+      # whose whole purpose is to notice a new one.
+      - name: Run the conformance test
+        run: uv run --no-project --refresh --with molt-release --with pytest pytest

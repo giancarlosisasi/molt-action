@@ -1,0 +1,10 @@
+# This repository ships one YAML file. There is no Python package here, so this file carries
+# pytest's configuration and nothing else -- the conformance test runs against a `molt-release`
+# installed on the fly, not against a project built from this directory.
+#
+# `molt-release` is installed unpinned on purpose. `action.yml` is referenced by a MOVING `v1`, so
+# the question this repository keeps answering is "does the action still match the CLI people will
+# install today", and a pin would answer a different, easier question.
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"

@@ -37,7 +37,7 @@ jobs:
 
       - uses: giancarlosisasi/molt-action@v1
         with:
-          molt-version: "0.1.2"   # pin molt; keeps the Action and the tool in lockstep
+          molt-version: "0.1.3"   # pin molt; keeps the Action and the tool in lockstep
           publish: molt publish   # the command to run in the publish phase
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,7 +66,7 @@ Every input is optional. Supplying only a token runs the version phase with the 
 
 | Input | Default | What it does |
 |---|---|---|
-| `molt-version` | latest release | The exact `molt-release` version to install, for example `"0.1.2"`. Empty installs the latest release. |
+| `molt-version` | latest release | The exact `molt-release` version to install, for example `"0.1.3"`. Empty installs the latest release. Pin 0.1.3 or later: earlier releases upload and tag but create no GitHub Release. |
 | `publish` | *(empty)* | The command that publishes the release, for example `molt publish`. Leave it empty to run the version phase only. Supplying it is also what makes the publish phase reachable at all. |
 | `version-command` | *(empty)* | The command that versions the release, for example `molt version --snapshot canary`. Empty runs `molt version`. |
 | `title` | `Version Packages` | The title of the release pull request. |

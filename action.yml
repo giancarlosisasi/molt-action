@@ -49,9 +49,10 @@ branding:
 inputs:
   molt-version:
     description: >-
-      The exact molt-release version to install, for example "0.1.0". Empty installs the latest
+      The exact molt-release version to install, for example "0.1.3". Empty installs the latest
       release. Pinning is recommended: it is what keeps this action and the CLI it runs in
-      lockstep between releases.
+      lockstep between releases. Pin 0.1.3 or later -- earlier releases upload and tag, then
+      create no GitHub Release and exit green.
     required: false
     default: ""
   publish:

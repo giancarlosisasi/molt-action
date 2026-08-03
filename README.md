@@ -8,7 +8,7 @@ molt is changeset-driven versioning and changelogs for Python monorepos. This Ac
 branch. It keeps a "Version Packages" pull request in sync with your pending changesets, and
 publishes to PyPI over OIDC when that pull request merges.
 
-Full documentation: [CI: GitHub Action](https://molt.gio-labs.com/guides/ci-github-action).
+Full documentation: [CI: GitHub Action](https://molt.gio-labs.com/guide/ci-github-action).
 
 ## Usage
 
